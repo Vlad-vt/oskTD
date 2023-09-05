@@ -118,7 +118,7 @@ namespace TouchDetector.InputDevices
         }
 
         // Here is my new function
-        public static void GetIAccessible2(int pid)
+        public static bool GetIAccessible2(int pid)
         {
             Console.WriteLine("PID = " + pid);
             //Guid guid = new Guid("6C496175-9160-5C3D-93EE-7DDB1E2D1CB0");
@@ -140,7 +140,10 @@ namespace TouchDetector.InputDevices
                 ptrToObj = Marshal.ReadIntPtr(ptrAccObj);
             }
             else
+            {
                 Console.WriteLine("ПРИПЛЫЛИ");
+                return false;
+            }
 
                 Guid iAccessibleGuid = new Guid(0x618736e0, 0x3c3d, 0x11cf, 0x81, 0xc, 0x0, 0xaa, 0x0, 0x38, 0x9b, 0x71);
             IntPtr iAccessiblePtr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(Guid)));
@@ -170,6 +173,7 @@ namespace TouchDetector.InputDevices
             proc = null;
             //ParseChildren(new MSAAUIItem(acc));
             acc = null;
+            return true;
         }
 
         private void SendData(int X, int Y)
@@ -282,11 +286,13 @@ namespace TouchDetector.InputDevices
                             {
                                 if (Process.GetCurrentProcess().Id != elementByTouch.CurrentProcessId)
                                 {
-                                    for (int j = 0; j < 5; j++)
+                                    var j = 0;
+                                    do
                                     {
-                                        GetIAccessible2(element.CurrentProcessId);
-                                    }
-                                    
+                                        if (GetIAccessible2(element.CurrentProcessId))
+                                            break;
+                                        j++;
+                                    } while (j < 20);
                                     Console.WriteLine(Process.GetProcessById(element.CurrentProcessId).ProcessName + " ID: " + element.CurrentProcessId + " WndName: " + Process.GetProcessById(element.CurrentProcessId).MainWindowTitle + " Control: " + element.CurrentLocalizedControlType + " Control type: " + element.CurrentAutomationId + " Control type: " + element.CurrentControlType);
                                     if (i >= 2)
                                     {
@@ -308,104 +314,7 @@ namespace TouchDetector.InputDevices
                                                 EDITFIELD_FOUND = false;
                                                 break;
                                         }
-                                        if(!EDITFIELD_FOUND)
-                                        {
-                                            switch (elementByTouch.CurrentControlType)
-                                            {
-                                                case 50016:
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                    EDITFIELD_FOUND = true;
-                                                    break;
-                                                case 50004:
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                    EDITFIELD_FOUND = true;
-                                                    break;
-                                                case 50003:
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                    EDITFIELD_FOUND = true;
-                                                    break;
-                                                default:
-                                                    EDITFIELD_FOUND = false;
-                                                    break;
-                                            }
-                                        }
                                     }
-                                    /*switch (element.CurrentLocalizedControlType)
-                                    {
-                                        case "поле":
-                                            if (i >= 2)
-                                            {
-                                                if (element.CurrentControlType == 50016 || elementByTouch.CurrentControlType == 50016)
-                                                {
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                }
-                                                else
-                                                {
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                }
-                                                EDITFIELD_FOUND = true;
-                                            }
-                                            break;
-                                        case "edit":
-                                            if (i >= 2)
-                                            {
-                                                if (element.CurrentControlType == 50016)
-                                                {
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                }
-                                                else
-                                                {
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                }
-                                                EDITFIELD_FOUND = true;
-                                            }
-                                            break;
-                                        case "вертушка":
-                                            if (i >= 2)
-                                            {
-                                                if (element.CurrentControlType == 50016)
-                                                {
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                }
-                                                else
-                                                {
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                }
-                                                EDITFIELD_FOUND = true;
-                                            }
-                                            break;
-                                        case "pinwheel":
-                                            if (i >= 2)
-                                            {
-                                                if (element.CurrentControlType == 50016)
-                                                {
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                }
-                                                else
-                                                {
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                }
-                                                EDITFIELD_FOUND = true;
-                                            }
-                                            break;
-                                        case "spinner":
-                                            if (i >= 2)
-                                            {
-                                                if (element.CurrentControlType == 50016)
-                                                {
-                                                    SendData("OPEN_NUMBERKEYBOARD");
-                                                }
-                                                else
-                                                {
-                                                    SendData("OPEN_TEXTKEYBOARD");
-                                                }
-                                                EDITFIELD_FOUND = true;
-                                            }
-                                            break;
-                                        default:
-                                            break;
-
-                                    }*/
                                 }
                             }
                         }
